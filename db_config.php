@@ -1,18 +1,19 @@
 <?php
-/* 
-Define Database credentials. 
+/*
+Define Database credentials.
 In MySQL server with default setting:
-user is 'root' with no password 
+user is 'root' with no password
 */
 
-$server_name = 'localhost:3308';
-$user_name = 'root';
-$db_password = '';
-$db_name = 'ecommercedb';
- 
+$server_name = 'localhost';
+$port = 3306;
+$user_name = 'nlkp';
+$db_password = 'jaynguyen';
+$db_name = 'intedb'; //ecommercedb
+
 /* Connect to MySQL database */
-$link = mysqli_connect($server_name, $user_name, $db_password, $db_name);
- 
+$link = mysqli_connect($server_name, $user_name, $db_password, $db_name, $port);
+
 // Check database connection
 if($link === false){
     die("ERROR: Could not connect. " . mysqli_connect_error());
