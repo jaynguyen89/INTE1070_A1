@@ -12,10 +12,10 @@ $db_password = 'jaynguyen';
 $db_name = 'intedb'; //ecommercedb
 
 /* Connect to MySQL database */
+global $link;
 $link = mysqli_connect($server_name, $user_name, $db_password, $db_name, $port);
 
 // Check database connection
 if($link === false){
     die("ERROR: Could not connect. " . mysqli_connect_error());
 }
-?>
