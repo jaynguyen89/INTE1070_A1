@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>INTE1070</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" />
+    <link rel="stylesheet" href="assets/custom.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/js/fontawesome.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.0.0-alpha.2/chart.min.js"></script>
+</head>
+<body>
+<div class="inte-header">
+    <h2>INTE1070: Secure Electronic Commerce - Statistics</h2>
+</div>
+
+<div class="container">
+    <div class="row" style="margin: 1rem auto;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Made by</th>
+                    <th scope="col">Submitted to</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>26 Mar 2020 10:49</td>
+                    <td>Business plan and strategy for Q2/2020</td>
+                    <td>PDF</td>
+                    <td>Harry Potter</td>
+                    <td>Amycus Carrow</td>
+                    <td><a href="#">Download</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>18 May 2020 14:11</td>
+                    <td>List of Imports Exports products</td>
+                    <td>CSV</td>
+                    <td>Cho Chang</td>
+                    <td>Marvolo Gaunt</td>
+                    <td><a href="#">Download</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>06 Jul 2020 09:37</td>
+                    <td>Warehouse and Leasing report</td>
+                    <td>PDF</td>
+                    <td>Aurora Sinistra</td>
+                    <td>Lee Jordan</td>
+                    <td><a href="#">Download</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="row" style="margin: 1rem auto;">
+        <div class="col-sm-6 stat-cell">
+            <canvas id="revenue-predict" class="chartjs" style="display: block;"></canvas>
+            <div>Revenue forecast for Quarters 3-4, fiscal year 2020. <b>CONFIDENTIAL</b></div>
+
+            <script type="application/javascript">
+                new Chart(document.getElementById("revenue-predict"), {
+                    "type": "line",
+                    "data": {
+                        "labels": ["Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
+                        "datasets": [{
+                            "label": "Revenue Prediction Q3-4/2020",
+                            "data": [90, 73, 64, 71, 56, 55, 40],
+                            "fill": false,
+                            "borderColor": "rgb(75, 192, 192)",
+                            "lineTension": 0.1
+                        }]
+                    },
+                    "options": {}
+                });
+            </script>
+        </div>
+
+        <div class="col-sm-6 stat-cell">
+            <canvas id="monthly-register" class="chartjs" style="display: block;"></canvas>
+            <div>Monthly new account registrations for Quaters 1-2/2020. <b>CONFIDENTIAL</b></div>
+
+            <script type="application/javascript">
+                new Chart(document.getElementById("monthly-register"), {
+                    "type": "bar",
+                    "data": {
+                        "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+                        "datasets": [{
+                            "label": "New Registrations x1,000",
+                            "data": [89, 70, 71, 49, 56, 55, 40, 32],
+                            "fill": false,
+                            "backgroundColor": ["rgba(255, 99, 132, 0.2)", "rgba(255, 159, 64, 0.2)", "rgba(255, 205, 86, 0.2)", "rgba(75, 192, 192, 0.2)", "rgba(54, 162, 235, 0.2)", "rgba(153, 102, 255, 0.2)", "rgba(201, 203, 207, 0.2)"],
+                            "borderColor": ["rgb(255, 99, 132)", "rgb(255, 159, 64)", "rgb(255, 205, 86)", "rgb(75, 192, 192)", "rgb(54, 162, 235)", "rgb(153, 102, 255)", "rgb(201, 203, 207)"],
+                            "borderWidth": 1
+                        }]
+                    },
+                    "options": {
+                        "scales": {
+                            "yAxes": [{
+                                "ticks": {
+                                    "beginAtZero": true
+                                }
+                            }]
+                        }
+                    }
+                });
+            </script>
+        </div>
+
+        <div class="col-sm-6 stat-cell">
+            <canvas id="operation-matrix" class="chartjs" style="display: block;"></canvas>
+            <div>Costs to Profits Matrix by sections of operation for Q1-2/2020. <b>CONFIDENTIAL</b></div>
+
+            <script type="application/javascript">
+                new Chart(document.getElementById("operation-matrix"), {
+                    "type": "radar",
+                    "data": {
+                        "labels": ["Marketing", "Import", "Export", "Exchange", "R&D", "Promotions", "Advertisement"],
+                        "datasets": [{
+                            "label": "Costs",
+                            "data": [65, 47, 45, 34, 70, 67, 45],
+                            "fill": true,
+                            "backgroundColor": "rgba(255, 99, 132, 0.2)",
+                            "borderColor": "rgb(255, 99, 132)",
+                            "pointBackgroundColor": "rgb(255, 99, 132)",
+                            "pointBorderColor": "#fff",
+                            "pointHoverBackgroundColor": "#fff",
+                            "pointHoverBorderColor": "rgb(255, 99, 132)"
+                        }, {
+                            "label": "Profits",
+                            "data": [41, 62, 86, 49, 59, 77, 83],
+                            "fill": true,
+                            "backgroundColor": "rgba(54, 162, 235, 0.2)",
+                            "borderColor": "rgb(54, 162, 235)",
+                            "pointBackgroundColor": "rgb(54, 162, 235)",
+                            "pointBorderColor": "#fff",
+                            "pointHoverBackgroundColor": "#fff",
+                            "pointHoverBorderColor": "rgb(54, 162, 235)"
+                        }]
+                    },
+                    "options": {
+                        "elements": {
+                            "line": {
+                                "tension": 0,
+                                "borderWidth": 3
+                            }
+                        }
+                    }
+                });
+            </script>
+        </div>
+
+        <div class="col-sm-6 stat-cell">
+            <canvas id="profit-sections" class="chartjs" style="display: block;"></canvas>
+            <div>Cost-Profits Distributions by sections of operation for Q1-2/2020. <b>CONFIDENTIAL</b></div>
+
+            <script type="application/javascript">
+                new Chart(document.getElementById("profit-sections"), {
+                    "type": "polarArea",
+                    "data": {
+                        "labels": ["Warehousing", "Showrooms", "E-Commerce", "Cooperations", "Leasing"],
+                        "datasets": [{
+                            "label": "My First Dataset",
+                            "data": [9, 19, 41, 13, 8],
+                            "backgroundColor": ["rgb(255, 99, 132)", "rgb(75, 192, 192)", "rgb(255, 205, 86)", "rgb(201, 203, 207)", "rgb(54, 162, 235)"]
+                        }]
+                    }
+                });
+            </script>
+        </div>
+
+        <div class="col-sm-12 stat-cell">
+            <canvas id="probabilities" class="chartjs" style="display: block;"></canvas>
+            <div>Forecast of market changes impacts on operation and management for Q3-4/2020. <b>CONFIDENTIAL</b></div>
+
+            <script type="application/javascript">
+                new Chart(document.getElementById("probabilities"), {
+                    "type": "bubble",
+                    "data": {
+                        "datasets": [{
+                            "label": "Levels of impacts",
+                            "data": [{"x": 20,"y": 100,"r": 26}, {"x": 18,"y": 62,"r": 71}, {"x": 37,"y": 10,"r": 13}, {"x": 48,"y": 21,"r": 9}, {"x": 70,"y": 16,"r": 22},
+                                {"x": 100,"y": 30,"r": 39}, {"x": 67,"y": 58,"r": 24}, {"x": 84,"y": 78,"r": 38}, {"x": 41,"y": 80,"r": 27}, {"x": 50,"y": 50,"r": 50},
+                                {"x": 95,"y": 90,"r": 15}, {"x": 80,"y": 40,"r": 36}, {"x": 25,"y": 20,"r": 37}, {"x": 32,"y": 35,"r": 23}, {"x": 60,"y": 85,"r": 38}],
+                            "backgroundColor": "rgb(255, 99, 132)"
+                        }]
+                    }
+                });
+            </script>
+        </div>
+    </div>
+</div>
+
+<div class="footer">S3493188 Le Kim Phuc Nguyen</div>
+</body>
+</html>

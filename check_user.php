@@ -93,7 +93,7 @@ mysqli_close($link);
         </div>
         <?php } ?>
 
-        <?php if ($_SESSION['demo']) {
+        <?php if (isset($_SESSION['demo'])) {
             echo '$email = ' . $email . '<br/>';
             echo '$password = ' . $password . '<br/>';
             echo '$result = ' . json_encode($result) . '<br/>';

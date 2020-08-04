@@ -17,6 +17,12 @@ $search_error = '';
 $data = array();
 $searching = false;
 
+$listing_error = false;
+$listing_message = '';
+
+global $query;
+$query = '';
+
 if ($searched_id && $_POST['submit'] == 'view_details') {
     $searching = true;
     $query = "SELECT P.*, U.first_name, U.last_name
@@ -53,14 +59,48 @@ else if ($searched_id && $_POST['submit'] == 'save-export') {
     }
     else $search_error = 'An error occurred while extracting data.';
 }
+else if (array_key_exists('submit', $_POST) && $_POST['submit'] == 'create-listing') {
+    $searching = false;
+
+    $promotion = $_POST['promotion'] == 1;
+    $listing_quota = $_POST['listing_quota'];
+    $account_type = $_POST['account_type'];
+
+    $item_name = $_POST['item_name'];
+    $description = $_POST['description'];
+    $stock = $_POST['stock'];
+    $unit_price = $_POST['unit_price'];
+
+    $expiry = date('Y-m-d H:i:s', strtotime('+30 days'));
+
+    if ($listing_quota > 0) {
+        $query = $promotion
+            ? "INSERT INTO products (user_id, product_name, unit_price, stock, description)
+                  VALUES (".$_SESSION['user_id'].", '".$item_name."', '".$unit_price."', '".$stock."', '".$description."')"
+            : "INSERT INTO products (user_id, product_name, unit_price, stock, description, expire_on)
+                  VALUES (".$_SESSION['user_id'].", '".$item_name."', '".$unit_price."', '".$stock."', '".$description."', '".$expiry."');";
+        try {
+            if (mysqli_query($link, $query)) {
+                $listing_error = false;
+                $listing_message = 'Your new listing is now published. And a listing fee of '.($account_type == 1 ? '$10' : '$1').' has been added to your account.';
+            }
+        } catch (Exception $e) {
+            $listing_error = true;
+            $listing_message = $e->getMessage();
+        }
+    }
+    else {
+        $listing_error = true;
+        $listing_message = 'You have run out of listing quota for this month.';
+    }
+
+    $result = getUserData();
+    if (!is_array($result)) $search_error = $result;
+    else $data = $result;
+}
 else {
     $searching = false;
-    $user_id = $_SESSION['user_id'];
-    $query = "SELECT P.*, U.first_name, U.last_name 
-              FROM products P, users U
-              WHERE P.user_id = U.id AND P.user_id= ".$user_id;
-
-    $result = getProducts($query);
+    $result = getUserData();
     if (!is_array($result)) $search_error = $result;
     else $data = $result;
 }
@@ -77,6 +117,16 @@ function getProducts($query) {
     }
 
     return $data;
+}
+
+function getUserData() {
+    global $query;
+    $user_id = $_SESSION['user_id'];
+    $query = "SELECT P.*, U.first_name, U.last_name 
+              FROM products P, users U
+              WHERE P.user_id = U.id AND P.user_id= ".$user_id;
+
+    return getProducts($query);
 }
 ?>
 <!DOCTYPE html>
@@ -110,8 +160,6 @@ function getProducts($query) {
     <hr style="border: 1px solid #2e87e6; width: 35%;" />
 
     <?php if ($_SESSION['demo']) {
-        echo '$searching = ' . json_encode($searching) . '<br/>';
-        echo '$search_error = ' . json_encode($search_error) . '<br/>';
         echo '$data = ' . json_encode($data) . '<br/>';
         echo '$_POST = ' . json_encode($_POST) . '<br/>';
         echo 'SQL Query: ' . $query . '<br/>';
@@ -129,9 +177,9 @@ function getProducts($query) {
                     <div class="form-group">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-search" style="font-size: 25px"></i>
-                                    </span>
+                                <span class="input-group-text">
+                                    <i class="fas fa-search" style="font-size: 25px"></i>
+                                </span>
                             </div>
                             <input name="product_id" type="text" class="form-control" placeholder="Enter a Product ID to view details">
                         </div>
@@ -164,6 +212,7 @@ function getProducts($query) {
                 <p>Product Name: <b><?php echo $data[0]['product_name']; ?></b></p>
                 <p>Unit Price: <b><?php echo $data[0]['unit_price']; ?></b></p>
                 <p>Stock: <b><?php echo $data[0]['stock']; ?></b></p>
+                <p>Description: <b style="line-height: 1.5rem;"><?php echo $data[0]['description']; ?></b></p>
 
                 <button class="btn btn-sm btn-primary float-right"
                         onClick="closeProductDetails()">
@@ -206,10 +255,89 @@ function getProducts($query) {
     <br />
     <div>List more items:</div>
 
-    <div class="row" style="margin: 2.5rem auto;">
-
+    <div class="error" style="line-height: 1.5rem">
+        Attention! You have outstanding debt in your account so that you will be unable to create more listings.<br />
+        Please go to your account and make payments to clear your debt first.
     </div>
 
+    <?php if ($listing_message != '') { ?>
+        <div class="<?php echo $listing_error ? 'error' : 'success' ?>">
+            <?php echo $listing_message; ?>
+        </div>
+    <?php } ?>
+
+    <div class="row" style="margin-bottom: 5rem">
+        <form method="post" action="home.php" class="form-group row">
+            <!-- Listing never expires -->
+            <input name="promotion" type="number" value="0" hidden />
+            <!-- Listings per month -->
+            <input name="listing_quota" type="number" value="0" hidden />
+            <!-- For discounted listing -->
+            <input name="account_type" type="number" value="1" hidden />
+
+            <div class="col-sm-4" style="margin-bottom: 7px;">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fas fa-pencil-alt" style="font-size: 25px"></i>
+                            </span>
+                        </div>
+                        <input name="item_name" type="text" class="form-control" placeholder="Item Name" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-8" style="margin-bottom: 7px;">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fas fa-pencil-alt" style="font-size: 25px"></i>
+                            </span>
+                        </div>
+                        <input name="description" type="text" class="form-control" placeholder="Description" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6" style="margin-bottom: 7px;">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fas fa-pencil-alt" style="font-size: 25px"></i>
+                            </span>
+                        </div>
+                        <input name="stock" type="number" class="form-control" placeholder="Stock" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6" style="margin-bottom: 7px;">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fas fa-pencil-alt" style="font-size: 25px"></i>
+                            </span>
+                        </div>
+                        <input name="unit_price" type="number" class="form-control" placeholder="Unit Price" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <button id="create-listing" type="submit" name="submit" value="create-listing" class="btn btn-primary disabled">
+                    <i class="fas fa-plus-circle"></i> Create
+                </button>
+            </div>
+        </form>
+
+        <br />
+        <?php if ($_SESSION['demo']) {
+            echo '$listing_error = ' . $listing_error . '<br/>';
+            echo '$listing_message = ' . $listing_message . '<br/>';
+            echo '$_POST = ' . json_encode($_POST) . '<br/>';
+        }
+        ?>
+    </div>
 
     <a href="logout.php" class="btn btn-danger" style="margin-bottom: 2rem">
         <i class="fas fa-sign-out-alt"></i> Sign Out
