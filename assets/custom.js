@@ -145,3 +145,58 @@ function clearForm(version = 2) {
         disableSubmit(version);
     }
 }
+
+let pin = '000000';
+let pos = [];
+async function collectPin(position) {
+    let sInput = '';
+    let input = 0;
+
+    for (let i = 1; i < 7; i++) {
+        if (position === i) {
+            if (pos.indexOf(position) === -1)
+                pos.push(position);
+
+            const elementId = 'pin' + i;
+            const nextElementId = 'pin' + (i + 1);
+
+            sInput = document.getElementById(elementId).value;
+            input = parseInt(sInput);
+
+            if (input < 10 && input > -1) {
+                if (i < 6) document.getElementById(nextElementId).focus();
+                pin = setCharAt(pin, i - 1, input.toString());
+            }
+
+            break;
+        }
+    }
+
+    let error = $('#pin-error');
+    if (pin.length === 6 && pos.length === 6) {
+        $('#waiting').css('display', 'block');
+        await sleep(1500);
+
+        let form = document.createElement('form');
+        form.action = 'verify_twofa.php';
+        form.method = 'post';
+
+        let input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'pin';
+        input.value = pin;
+
+        form.appendChild(input);
+        document.body.append(form);
+        form.submit();
+    }
+}
+
+function setCharAt(str, index, chr) {
+    if(index > str.length - 1) return str;
+    return str.substring(0, index) + chr + str.substring(index + chr.length);
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
