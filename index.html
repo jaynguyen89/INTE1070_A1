@@ -26,9 +26,10 @@
         <div class="login-area">
             <h4><i class="fas fa-unlock-alt"></i> Login</h4>
             <h6>Please fill in your credentials to login.</h6>
+            <h6>Or <a href="twofa_login.php">CLICK HERE</a> to login with <b>Two-Factor Authentification</b>.</h6>
 
             <div class="login-row">
-                <form action="./check_user.php" method="post">
+                <form action="./check_user.php" method="post" autocomplete="off">
                     <div class="col-sm-12" style="margin-bottom: 0.5rem;">
                         <div class="form-group">
                             <div class="input-group">
@@ -37,7 +38,7 @@
                                 <i class="fas fa-at" style="font-size: 1.5rem"></i>
                             </span>
                                 </div>
-                                <input name="email" type="text" class="form-control" placeholder="Email">
+                                <input name="email" type="text" class="form-control" placeholder="Email" autocomplete="none">
                             </div>
                         </div>
                     </div>
@@ -49,7 +50,7 @@
                                     <i class="fas fa-key" style="font-size: 1.5rem"></i>
                                 </span>
                                 </div>
-                                <input name="password" type="password" class="form-control" placeholder="Password">
+                                <input name="password" type="password" class="form-control" placeholder="Password" autocomplete="none">
                             </div>
                         </div>
                     </div>
@@ -64,6 +65,14 @@
                     </button>
                 </form>
             </div>
+        </div>
+
+        <div class="goto-recaptcha">
+            <h4>Or create a new account now using:</h4>
+            <br/>
+
+            <a class="btn btn-primary" href="recaptcha_v2.php">Recaptcha V2</a>
+            <a class="btn btn-primary" href="recaptcha_v3.php">Recaptcha V3</a>
         </div>
     </div>
 

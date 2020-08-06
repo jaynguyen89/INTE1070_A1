@@ -105,7 +105,7 @@ mysqli_close($link);
         ?>
 
         <div class="login-row">
-            <form action="./check_user.php" method="post">
+            <form action="./check_user.php" method="post" autocomplete="off">
                 <div class="col-sm-12" style="margin-bottom: 0.5rem;">
                     <div class="form-group">
                         <div class="input-group">
@@ -114,7 +114,7 @@ mysqli_close($link);
                             <i class="fas fa-at" style="font-size: 1.5rem"></i>
                         </span>
                             </div>
-                            <input name="email" value="<?php echo $email; ?>" type="text" class="form-control" placeholder="Email">
+                            <input name="email" value="<?php echo $email; ?>" type="text" class="form-control" placeholder="Email" autocomplete="none">
                         </div>
                     </div>
                 </div>
@@ -126,7 +126,7 @@ mysqli_close($link);
                                 <i class="fas fa-key" style="font-size: 1.5rem"></i>
                             </span>
                             </div>
-                            <input name="password" value="<?php echo $password; ?>" type="password" class="form-control" placeholder="Password">
+                            <input name="password" value="<?php echo $password; ?>" type="password" class="form-control" placeholder="Password" autocomplete="none">
                         </div>
                     </div>
                 </div>
