@@ -55,16 +55,15 @@ if ($fname == null || strlen($fname) == 0 ||
 if (strlen($token) == 0)
     $message .= '<br/>Recaptcha is not verified.';
 
-$response = '';
 if (strlen($message) == 0) {
     $url = 'https://www.google.com/recaptcha/api/siteverify?response='.$token.'&secret=6LdHoboZAAAAAG8422PPFoCAPNYSn_I4fQ7P6dOf';
-    $ch = curl_init();
+    $request = curl_init();
 
-    curl_setopt($ch,CURLOPT_URL, $url);
-    curl_setopt($ch,CURLOPT_POST, true);
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($request,CURLOPT_URL, $url);
+    curl_setopt($request,CURLOPT_POST, true);
+    curl_setopt($request,CURLOPT_RETURNTRANSFER, true);
 
-    $response = curl_exec($ch);
+    $response = curl_exec($request);
     if (!$response) $message = 'Unable to validate your Recaptcha response. Please check network connection and retry.';
     else {
         $jresponse = json_decode($response);

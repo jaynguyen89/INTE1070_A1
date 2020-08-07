@@ -1,3 +1,6 @@
+let pin = '000000';
+let pinpos = [];
+
 function onExpiry() {
     $('#recaptcha-info').attr('class', 'error');
     $('#recaptcha-info').html('Recaptcha verification has expired.<br />Please click the `I am not a robot` checkbox again.');
@@ -146,16 +149,14 @@ function clearForm(version = 2) {
     }
 }
 
-let pin = '000000';
-let pos = [];
 async function collectPin(position) {
     let sInput = '';
     let input = 0;
 
     for (let i = 1; i < 7; i++) {
         if (position === i) {
-            if (pos.indexOf(position) === -1)
-                pos.push(position);
+            if (pinpos.indexOf(position) === -1)
+                pinpos.push(position);
 
             const elementId = 'pin' + i;
             const nextElementId = 'pin' + (i + 1);
@@ -172,8 +173,7 @@ async function collectPin(position) {
         }
     }
 
-    let error = $('#pin-error');
-    if (pin.length === 6 && pos.length === 6) {
+    if (pin.length === 6 && pinpos.length === 6) {
         $('#waiting').css('display', 'block');
         await sleep(2000);
 
@@ -188,8 +188,15 @@ async function collectPin(position) {
 
         form.appendChild(input);
         document.body.append(form);
+
+        resetGlobalVars();
         form.submit();
     }
+}
+
+function resetGlobalVars() {
+    pin = '000000';
+    pinpos = [];
 }
 
 function setCharAt(str, index, chr) {

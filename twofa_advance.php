@@ -118,7 +118,7 @@ mysqli_close($link);
                             </div>
                         </div>
                     </div>
-                    <button type="submit" name="submit" value="basic_2fa" class="btn btn-primary">
+                    <button type="submit" name="submit" value="advanced_2fa" class="btn btn-primary">
                         <i class="fas fa-sign-in-alt"></i> Login
                     </button>
                 </form>

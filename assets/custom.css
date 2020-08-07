@@ -144,6 +144,10 @@ input[type=number] {
     -moz-appearance:textfield;
 }
 
+input:disabled {
+    background-color: #ced4da;
+}
+
 .spinner {
     display: inline-block;
     width: 50px;

@@ -162,16 +162,16 @@ mysqli_close($link);
     <?php if ($login_message) { ?>
         <style type="text/css">
             .login-success {
-                width: 50%;
-                height: 3rem;
-                margin: 0.5rem auto;
+                width: 75%;
+                height: 4rem;
+                margin: 1rem auto;
                 background-color: #bfffe0;
                 color: #474747;
                 font-size: 1.25rem;
                 font-weight: 500;
                 text-align: center;
-                padding: 1rem;
-                line-height: 1rem;
+                padding: 1.25rem;
+                line-height: 1.25rem;
             }
         </style>
         <div class="login-success"><?php echo $login_message; ?></div>

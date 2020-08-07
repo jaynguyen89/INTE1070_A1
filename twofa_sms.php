@@ -7,15 +7,8 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
 }
 
 require_once 'assets/libs/GoogleAuthenticator.php';
-require_once 'assets/libs/phpmailer/Exception.php';
-require_once 'assets/libs/phpmailer/PHPMailer.php';
-require_once 'assets/libs/phpmailer/SMTP.php';
 require_once 'db_config.php';
 global $link;
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use PHPMailer\PHPMailer\SMTP;
 
 $email = array_key_exists('email', $_POST) ? $_POST["email"] : null;
 $password = array_key_exists('password', $_POST) ? $_POST["password"] : null;
@@ -32,73 +25,66 @@ if (strlen($message) == 0) {
     $data = mysqli_fetch_array($result, MYSQLI_ASSOC);
 
     if ($data != null) {
-        $authenticator = new GoogleAuthenticator();
+        if ($data['phone']) {
+            $authenticator = new GoogleAuthenticator();
 
-        if (!$data['secret_code']) {
-            try {
-                $secret = $authenticator->createSecret();
-                //$qrCode = $authenticator->getQRCodeGoogleUrl($data['email'], $secret, 'INTE1070_S3493188');
+            if (!$data['secret_code']) {
+                try {
+                    $secret = $authenticator->createSecret();
+                    $query = 'UPDATE users SET secret_code = \''.$secret.'\' WHERE email = \''.$data['email'].'\'';
 
-                $query = 'UPDATE users SET secret_code = \''.$secret.'\' WHERE email = \''.$data['email'].'\'';
+                    if (mysqli_query($link, $query)) {
+                        $code = $authenticator->getCode($secret);
 
-                if (mysqli_query($link, $query)) {
-                    $code = $authenticator->getCode($secret);
-
-                    if (sendCodeToEmail($code, $data['email'])) {
-                        $_SESSION['pending_email'] = $data['email'];
-                        $_SESSION['code'] = $code;
-                        header("location: verify_twofa.php");
+                        if (sendCodeToSms($code, $data['phone'])) {
+                            $_SESSION['pending_email'] = $data['email'];
+                            $_SESSION['code'] = $code;
+                            header("location: verify_twofa.php");
+                        }
+                        else
+                            $message = 'We ran into an issue while sending 2FA PIN to your mobile. Please retry login.';
                     }
-                    else
-                        $message = 'We ran into an issue while sending 2FA PIN to your email. Please retry login.';
+                    else $message = 'An error occurred while initializing your Two-Factor Authentication setup. Please retry login.';
+                } catch (Exception $e) {
+                    $message = $e->getMessage();
                 }
-                else $message = 'An error occurred while initializing your Two-Factor Authentication setup. Please retry login.';
-            } catch (Exception $e) {
-                $message = $e->getMessage();
+            }
+            else {
+                $code = $authenticator->getCode($data['secret_code']);
+                if (sendCodeToSms($code, $data['phone'])) {
+                    $_SESSION['pending_email'] = $data['email'];
+                    $_SESSION['code'] = $code;
+                    header("location: verify_twofa.php");
+                }
+                else
+                    $message = 'We ran into an issue while sending 2FA PIN to your email. Please retry login.';
             }
         }
         else {
-            $code = $authenticator->getCode($data['secret_code']);
-            if (sendCodeToEmail($code, $data['email'])) {
-                $_SESSION['pending_email'] = $data['email'];
-                $_SESSION['code'] = $code;
-                header("location: verify_twofa.php");
-            }
-            else
-                $message = 'We ran into an issue while sending 2FA PIN to your email. Please retry login.';
+            $_SESSION["loggedin"] = true;
+            $_SESSION["first_name"] = $data['first_name'];
+            $_SESSION["last_name"] = $data['last_name'];
+            $_SESSION["email"] = $email;
+            $_SESSION['user_id'] = $data['id'];
+            $_SESSION['demo'] = false;
+            $_SESSION['login_message'] = 'Please update your details and provide mobile number for secured login. Login Successful.';
         }
     } else
         $message = 'That email and password pair is not a match.';
 }
 
-function sendCodeToEmail($code, $email) {
-    $message = file_get_contents('./assets/twofa_email_template.html');
-    $message = str_replace('[CODE]', $code, $message);
+function sendCodeToSms($code, $number) {
+    $url = 'https://platform.clickatell.com/messages/http/send?apiKey=4ELlaITwTqS_KTFIzQkArA==&to='.$number.'&content=Please%20use%20this%20PIN%20to%20login:%20'.$code;
+    $response = file_get_contents($url);
 
-    $mail = new PHPMailer();
-    try {
-        $mail->isSMTP();
-        $mail->SMTPDebug = SMTP::DEBUG_SERVER;
-        $mail->Host = 'smtp.google.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'nguyen.le.kim.phuc@gmail.com';
-        $mail->Password = 'Chay571990';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port = 465;
-
-        $mail->setFrom('s3493188@student.rmit.edu.au', 'Inte1070');
-        $mail->addAddress($email);
-        $mail->isHTML(true);
-        $mail->Subject = 'Inte1070 - 2FA verification';
-        $mail->Body = $message;
-
-        $mail->send();
-    } catch (Exception $e) {
-        echo $e->getMessage();
-        return false;
+    if (!$response) return false;
+    else {
+        if (substr_count($response, 'null') >= 2 &&
+            substr_count($response, 'true') == 1)
+            return true;
     }
 
-    return true;
+    return false;
 }
 
 mysqli_close($link);
@@ -130,11 +116,11 @@ mysqli_close($link);
 
 <div class="container">
     <div class="login-area">
-        <h4><i class="fas fa-unlock-alt"></i> Basic 2FA Login</h4>
+        <h4><i class="fas fa-unlock-alt"></i> SMS 2FA Login</h4>
         <h6>Please enter your login credentials to begin.</h6>
 
         <div class="login-row">
-            <form action="./twofa_basic.php" method="post" autocomplete="off">
+            <form action="./twofa_sms.php" method="post" autocomplete="off">
                 <?php if (array_key_exists('submit', $_POST) && strlen($message) != 0) { ?>
                     <p class="error"><?php echo $message; ?></p>
                 <?php } ?>
@@ -163,7 +149,7 @@ mysqli_close($link);
                         </div>
                     </div>
                 </div>
-                <button type="submit" name="submit" value="basic_2fa" class="btn btn-primary">
+                <button type="submit" name="submit" value="sms_2fa" class="btn btn-primary">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
             </form>
