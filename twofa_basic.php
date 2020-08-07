@@ -37,8 +37,6 @@ if (strlen($message) == 0) {
         if (!$data['secret_code']) {
             try {
                 $secret = $authenticator->createSecret();
-                //$qrCode = $authenticator->getQRCodeGoogleUrl($data['email'], $secret, 'INTE1070_S3493188');
-
                 $query = 'UPDATE users SET secret_code = \''.$secret.'\' WHERE email = \''.$data['email'].'\'';
 
                 if (mysqli_query($link, $query)) {
@@ -119,7 +117,6 @@ mysqli_close($link);
     <link rel="stylesheet" href="assets/custom.css" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/js/fontawesome.min.js"></script>
 </head>

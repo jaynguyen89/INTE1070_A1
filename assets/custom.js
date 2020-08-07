@@ -207,3 +207,18 @@ function setCharAt(str, index, chr) {
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+function confirmTwoFa(renew = false) {
+    let form = document.createElement('form');
+    form.action = 'security_setting.php';
+    form.method = 'post';
+
+    let input = document.createElement('input');
+    input.name = 'tfa_form';
+    input.value = renew ? 'new_2fa' : 'two_fa';
+    input.type = 'hidden';
+
+    form.appendChild(input);
+    document.body.append(form);
+    form.submit();
+}
