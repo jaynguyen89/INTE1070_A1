@@ -6,7 +6,46 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
     exit;
 }
 
+require_once 'assets/libs/GoogleAuthenticator.php';
+require_once 'db_config.php';
+global $link;
 
+$code = array_key_exists('pin', $_POST) ? $_POST['pin'] : null;
+$email = $_SESSION['pending_email'];
+
+$message = '';
+if ($code) {
+    $query = "SELECT * FROM users WHERE email='$email'";
+    $result = mysqli_query($link, $query);
+    $data = mysqli_fetch_array($result, MYSQLI_ASSOC);
+
+    if ($data) {
+        $authenticator = new GoogleAuthenticator();
+
+        if ($authenticator->verifyCode($data['secret_code'], $code)) {
+            $_SESSION["loggedin"] = true;
+            $_SESSION["first_name"] = $data['first_name'];
+            $_SESSION["last_name"] = $data['last_name'];
+            $_SESSION["email"] = $email;
+            $_SESSION['user_id'] = $data['id'];
+            $_SESSION['demo'] = false;
+            $_SESSION['login_message'] = 'Your secret PIN verification is correct. Login successful!';
+
+            unset($_SESSION['pending_email']);
+            header("location: home.php");
+        }
+        else {
+            $message = 'The PIN is invalid. Please try login again.';
+            session_destroy();
+        }
+    }
+    else {
+        $message = 'An issue happened while checking data. Please try login again.';
+        session_destroy();
+    }
+}
+
+mysqli_close($link);
 ?>
 
 <!DOCTYPE html>
@@ -33,7 +72,7 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
 <div class="inte-header">
     <h2>INTE1070: Secure Electronic Commerce</h2>
 </div>
-
+<?php echo $_SESSION['code']; ?>
 <div class="container">
     <div class="login-area text-center">
         <h4><i class="fas fa-unlock-alt"></i> Verify Two-FA PIN</h4>

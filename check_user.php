@@ -44,6 +44,7 @@ if ($count > 0) {
     $_SESSION["email"] = $email;
     $_SESSION['user_id'] = $data[4];
     $_SESSION['demo'] = $demo;
+    $_SESSION['login_message'] = 'You have logged in successfully.';
 
     // Redirect user to welcome page
     header("location: home.php");

@@ -175,7 +175,7 @@ async function collectPin(position) {
     let error = $('#pin-error');
     if (pin.length === 6 && pos.length === 6) {
         $('#waiting').css('display', 'block');
-        await sleep(1500);
+        await sleep(2000);
 
         let form = document.createElement('form');
         form.action = 'verify_twofa.php';

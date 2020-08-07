@@ -85,6 +85,8 @@ if (strlen($message) == 0) {
         }
     }
 }
+
+mysqli_close($link);
 ?>
 
 <!DOCTYPE html>

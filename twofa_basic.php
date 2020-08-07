@@ -7,19 +7,24 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
 }
 
 require_once 'assets/libs/GoogleAuthenticator.php';
+require_once 'assets/libs/phpmailer/Exception.php';
+require_once 'assets/libs/phpmailer/PHPMailer.php';
+require_once 'assets/libs/phpmailer/SMTP.php';
 require_once 'db_config.php';
 global $link;
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
 $email = array_key_exists('email', $_POST) ? $_POST["email"] : null;
 $password = array_key_exists('password', $_POST) ? $_POST["password"] : null;
 $message = '';
-$action = 'login_form';
 
 if (strlen($email) == 0 || strlen($password) == 0 ||
     strlen(trim($email)) == 0 || strlen(trim($password)) == 0)
     $message = 'Email and Password cannot be empty!';
 
-$qrCode = null;
 if (strlen($message) == 0) {
     $query = "SELECT * FROM users WHERE email='$email'";
 
@@ -27,30 +32,76 @@ if (strlen($message) == 0) {
     $data = mysqli_fetch_array($result, MYSQLI_ASSOC);
 
     if ($data != null) {
-        if (!$data['qr_code']) {
-            $authenticator = new GoogleAuthenticator();
+        $authenticator = new GoogleAuthenticator();
 
+        if (!$data['secret_code']) {
             try {
                 $secret = $authenticator->createSecret();
-                $qrCode = $authenticator->getQRCodeGoogleUrl($data['email'], $secret, 'INTE1070_S3493188');
+                //$qrCode = $authenticator->getQRCodeGoogleUrl($data['email'], $secret, 'INTE1070_S3493188');
 
-                $query = 'UPDATE users SET secret_code = \''.$secret.'\', qr_code = \''.$qrCode.'\' WHERE email = \''.$data['email'].'\'';
+                $query = 'UPDATE users SET secret_code = \''.$secret.'\' WHERE email = \''.$data['email'].'\'';
 
-                if (mysqli_query($link, $query)) $action = 'qr_setup';
+                if (mysqli_query($link, $query)) {
+                    $code = $authenticator->getCode($secret);
+
+                    if (sendCodeToEmail($code, $data['email'])) {
+                        $_SESSION['pending_email'] = $data['email'];
+                        $_SESSION['code'] = $code;
+                        header("location: verify_twofa.php");
+                    }
+                    else
+                        $message = 'We ran into an issue while sending 2FA code to your email. Please retry login.';
+                }
                 else $message = 'An error occurred while initializing your Two-Factor Authentication setup. Please retry login.';
             } catch (Exception $e) {
                 $message = $e->getMessage();
             }
         }
         else {
-            $_SESSION['pending_email'] = $data['email'];
-            $_SESSION['referrer'] = 'twofa_basic';
-
-            header("location: verify_twofa.php");
+            $code = $authenticator->getCode($data['secret_code']);
+            if (sendCodeToEmail($code, $data['email'])) {
+                $_SESSION['pending_email'] = $data['email'];
+                $_SESSION['code'] = $code;
+                header("location: verify_twofa.php");
+            }
+            else
+                $message = 'We ran into an issue while sending 2FA code to your email. Please retry login.';
         }
     } else
         $message = 'That email and password pair is not a match.';
 }
+
+function sendCodeToEmail($code, $email) {
+    $message = file_get_contents('./assets/twofa_email_template.html');
+    $message = str_replace('[CODE]', $code, $message);
+
+    $mail = new PHPMailer();
+    try {
+        $mail->isSMTP();
+        $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+        $mail->Host = 'smtp.google.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'nguyen.le.kim.phuc@gmail.com';
+        $mail->Password = 'Chay571990';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+
+        $mail->setFrom('s3493188@student.rmit.edu.au', 'Inte1070');
+        $mail->addAddress($email);
+        $mail->isHTML(true);
+        $mail->Subject = 'Inte1070 - 2FA verification';
+        $mail->Body = $message;
+
+        $mail->send();
+    } catch (Exception $e) {
+        echo $e->getMessage();
+        return false;
+    }
+
+    return true;
+}
+
+mysqli_close($link);
 ?>
 
 <!DOCTYPE html>
@@ -80,60 +131,55 @@ if (strlen($message) == 0) {
 <div class="container">
     <div class="login-area">
         <h4><i class="fas fa-unlock-alt"></i> Basic 2FA Login</h4>
-        <?php if ($action == 'login_form') { ?>
-            <h6>Please fill in your credentials to login.</h6>
-        <?php } else { ?>
-            <h6>Please setup your Two Factor Authenticator to continue.</h6>
-        <?php } ?>
+        <h6>Please enter your login credentials to begin.</h6>
 
         <div class="login-row">
-            <?php if ($action == 'login_form') { ?>
-                <form action="./twofa_basic.php" method="post" autocomplete="off">
-                    <?php if (array_key_exists('submit', $_POST) && strlen($message) != 0) { ?>
-                        <p class="error"><?php echo $message; ?></p>
-                    <?php } ?>
+            <form action="./twofa_basic.php" method="post" autocomplete="off">
+                <?php if (array_key_exists('submit', $_POST) && strlen($message) != 0) { ?>
+                    <p class="error"><?php echo $message; ?></p>
+                <?php } ?>
 
-                    <div class="col-sm-12" style="margin-bottom: 0.5rem;">
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                    <i class="fas fa-at" style="font-size: 1.5rem"></i>
-                                </span>
-                                </div>
-                                <input name="email" type="text" class="form-control" placeholder="Email" autocomplete="none">
+                <div class="col-sm-12" style="margin-bottom: 0.5rem;">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fas fa-at" style="font-size: 1.5rem"></i>
+                            </span>
                             </div>
+                            <input name="email" type="text" class="form-control" placeholder="Email" autocomplete="none">
                         </div>
                     </div>
-                    <div class="col-sm-12" style="margin-bottom: 0.5rem;">
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-key" style="font-size: 1.5rem"></i>
-                                    </span>
-                                </div>
-                                <input name="password" type="password" class="form-control" placeholder="Password" autocomplete="none">
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" name="submit" value="basic_2fa" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt"></i> Login
-                    </button>
-                </form>
-            <?php } else if ($action == 'qr_setup') { ?>
-                <div class="col-sm-12 text-center">
-                    <img src="<?php echo $qrCode; ?>">
-                    <div class="instruction">
-                        <h3><i class="far fa-question-circle"></i> How to setup:</h3>
-                        <p><i class="fas fa-circle"></i> Install Google Authenticator app on your mobile.</p>
-                        <p><i class="fas fa-circle"></i> Launch the app, scan the QR image.</p>
-                        <p><i class="fas fa-circle"></i> Remember to tap on `Add Account` button after you have scanned the QR image.</p>
-                        <p><i class="fas fa-circle"></i> When you are done, click the `Continue` button.</p>
-                    </div>
-                    <a href="verify_twofa.php" class="btn btn-primary">Continue</a>
                 </div>
-            <?php } ?>
+                <div class="col-sm-12" style="margin-bottom: 0.5rem;">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fas fa-key" style="font-size: 1.5rem"></i>
+                                </span>
+                            </div>
+                            <input name="password" type="password" class="form-control" placeholder="Password" autocomplete="none">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" name="submit" value="basic_2fa" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+
+<!--                <div class="col-sm-12 text-center">-->
+<!--                    <img src="--><?php //echo $qrCode; ?><!--">-->
+<!--                    <div class="instruction">-->
+<!--                        <h3><i class="far fa-question-circle"></i> How to setup:</h3>-->
+<!--                        <p><i class="fas fa-circle"></i> Install Google Authenticator app on your mobile.</p>-->
+<!--                        <p><i class="fas fa-circle"></i> Launch the app, scan the QR image.</p>-->
+<!--                        <p><i class="fas fa-circle"></i> Remember to tap on `Add Account` button after you have scanned the QR image.</p>-->
+<!--                        <p><i class="fas fa-circle"></i> When you are done, click the `Continue` button.</p>-->
+<!--                    </div>-->
+<!--                    <a href="verify_twofa.php" class="btn btn-primary">Continue</a>-->
+<!--                </div>-->
+<!--            --><?php //} ?>
         </div>
     </div>
 </div>

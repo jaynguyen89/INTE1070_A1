@@ -11,6 +11,9 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 require_once 'db_config.php';
 global $link;
 
+$login_message = array_key_exists('login_message', $_SESSION) ? $_SESSION['login_message'] : null;
+unset($_SESSION['login_message']);
+
 $searched_id = array_key_exists('product_id', $_POST) ? $_POST['product_id'] : null;
 $search_error = '';
 
@@ -128,6 +131,8 @@ function getUserData() {
 
     return getProducts($query);
 }
+
+mysqli_close($link);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -154,6 +159,24 @@ function getUserData() {
 </div>
 
 <div class="container">
+    <?php if ($login_message) { ?>
+        <style type="text/css">
+            .login-success {
+                width: 50%;
+                height: 3rem;
+                margin: 0.5rem auto;
+                background-color: #bfffe0;
+                color: #474747;
+                font-size: 1.25rem;
+                font-weight: 500;
+                text-align: center;
+                padding: 1rem;
+                line-height: 1rem;
+            }
+        </style>
+        <div class="login-success"><?php echo $login_message; ?></div>
+    <?php } ?>
+
     <h2 style="margin-top: 2rem;">Hi, <?php echo $_SESSION["first_name"]." ".$_SESSION["last_name"]; ?></h2>
     <h4>Welcome to our E-Commerce Site.</h4>
 
