@@ -87,12 +87,7 @@ mysqli_close($link);
     <div class="login-area">
         <h4>Welcome to E-commerce website</h4>
 
-        <?php if ($email_err || $password_err) { ?>
-        <div class="error">
-            <p><?php echo $email_err;?></p>
-            <p><?php echo $password_err;?></p>
-        </div>
-        <?php } ?>
+
 
         <?php if (isset($_SESSION['demo'])) {
             echo '$email = ' . $email . '<br/>';
@@ -105,42 +100,81 @@ mysqli_close($link);
         }
         ?>
 
-        <div class="login-row">
-            <form action="./check_user.php" method="post" autocomplete="off">
-                <div class="col-sm-12" style="margin-bottom: 0.5rem;">
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <div class="login-row">
+                    <?php if ($email_err || $password_err) { ?>
+                        <div class="error">
+                            <p><?php echo $email_err;?></p>
+                            <p><?php echo $password_err;?></p>
+                        </div>
+                    <?php } ?>
+
+                    <form action="./check_user.php" method="post" autocomplete="off">
+                        <div class="col-sm-12" style="margin-bottom: 0.5rem;">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
                         <span class="input-group-text">
                             <i class="fas fa-at" style="font-size: 1.5rem"></i>
                         </span>
+                                    </div>
+                                    <input name="email" value="<?php echo $email; ?>" type="text" class="form-control" placeholder="Email" autocomplete="none">
+                                </div>
                             </div>
-                            <input name="email" value="<?php echo $email; ?>" type="text" class="form-control" placeholder="Email" autocomplete="none">
                         </div>
-                    </div>
-                </div>
-                <div class="col-sm-12" style="margin-bottom: 0.5rem;">
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
+                        <div class="col-sm-12" style="margin-bottom: 0.5rem;">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
                             <span class="input-group-text">
                                 <i class="fas fa-key" style="font-size: 1.5rem"></i>
                             </span>
+                                    </div>
+                                    <input name="password" value="<?php echo $password; ?>" type="password" class="form-control" placeholder="Password" autocomplete="none">
+                                </div>
                             </div>
-                            <input name="password" value="<?php echo $password; ?>" type="password" class="form-control" placeholder="Password" autocomplete="none">
                         </div>
+                        <div class="col-sm-12" style="margin-bottom: 1rem;">
+                            <div class="form-check">
+                                <input type="checkbox" checked="<?php echo $demo; ?>" class="form-check-input" name="demo" id="demo">
+                                <label class="form-check-label" for="demo">For demo purpose</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <div class="login-row text-center">
+                    <h6>Or select the following Login with<br/>Two-Factor Authentication.</h6>
+                    <div class="icon-bar">
+                        <a href="twofa_basic.php" data-toggle="tooltip" data-placement="top" title="Email-based 2FA">
+                            <i class="far fa-envelope"></i>
+                            <p style="font-size: 1rem; color: black; text-decoration: none;">Mail-based</p>
+                        </a>
+                        <a href="twofa_advance.php" data-toggle="tooltip" data-placement="top" title="Authenticator App">
+                            <i class="fas fa-mobile-alt"></i>
+                            <p style="font-size: 1rem; color: black; text-decoration: none;">App-based</p>
+                        </a>
+                        <a href="twofa_basic.php" data-toggle="tooltip" data-placement="top" title="SMS-based 2FA">
+                            <i class="fas fa-sms"></i>
+                            <p style="font-size: 1rem; color: black; text-decoration: none;">SMS-based</p>
+                        </a>
                     </div>
                 </div>
-                <div class="col-sm-12" style="margin-bottom: 1rem;">
-                    <div class="form-check">
-                        <input type="checkbox" checked="<?php echo $demo; ?>" class="form-check-input" name="demo" id="demo">
-                        <label class="form-check-label" for="demo">For demo purpose</label>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-            </form>
+            </div>
+        </div>
+
+        <div class="goto-recaptcha">
+            <h4>New user? Create an account now using:</h4>
+            <br/>
+
+            <a class="btn btn-primary" href="recaptcha_v2.php">Recaptcha V2</a>
+            <a class="btn btn-primary" href="recaptcha_v3.php">Recaptcha V3</a>
         </div>
     </div>
 </div>

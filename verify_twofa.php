@@ -11,10 +11,13 @@ require_once 'db_config.php';
 global $link;
 
 $code = array_key_exists('pin', $_POST) ? $_POST['pin'] : null;
-$email = $_SESSION['pending_email'];
-
+$email = null;
 $message = '';
-if ($code) {
+if (array_key_exists('pending_email', $_SESSION))
+    $email = $_SESSION['pending_email'];
+else $message = 'You can only verify PIN once. Please to login again and retry.';
+
+if ($code && $email) {
     $query = "SELECT * FROM users WHERE email='$email'";
     $result = mysqli_query($link, $query);
     $data = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -72,35 +75,36 @@ mysqli_close($link);
 <div class="inte-header">
     <h2>INTE1070: Secure Electronic Commerce</h2>
 </div>
-<?php echo $_SESSION['code']; ?>
+<?php echo $code; ?>
 <div class="container">
     <div class="login-area text-center">
         <h4><i class="fas fa-unlock-alt"></i> Verify Two-FA PIN</h4>
         <h6>Enter the 6-digits PIN you get in your email to verify.</h6>
-        <p class="error" id="pin-error"></p>
 
-        <?php echo json_encode($_POST); ?>
-
-        <div class="row login-row" id="pin-row">
-            <div class="col-md-2 col-sm-4">
-                <input id="pin1" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(1)" />
+        <?php if ($message != '') { ?>
+            <p class="error" id="pin-error"><?php echo $message; ?></p>
+        <?php } else { ?>
+            <div class="row login-row" id="pin-row">
+                <div class="col-md-2 col-sm-4">
+                    <input id="pin1" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(1)" />
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    <input id="pin2" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(2)" />
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    <input id="pin3" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(3)" />
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    <input id="pin4" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(4)" />
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    <input id="pin5" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(5)" />
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    <input id="pin6" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(6)" />
+                </div>
             </div>
-            <div class="col-md-2 col-sm-4">
-                <input id="pin2" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(2)" />
-            </div>
-            <div class="col-md-2 col-sm-4">
-                <input id="pin3" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(3)" />
-            </div>
-            <div class="col-md-2 col-sm-4">
-                <input id="pin4" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(4)" />
-            </div>
-            <div class="col-md-2 col-sm-4">
-                <input id="pin5" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(5)" />
-            </div>
-            <div class="col-md-2 col-sm-4">
-                <input id="pin6" type="number" max="9" min="0" class="pin-cell" oninput="collectPin(6)" />
-            </div>
-        </div>
+        <?php } ?>
 
         <div id="waiting" style="margin-top: 5rem; display: none">
             <div class="spinner"></div>

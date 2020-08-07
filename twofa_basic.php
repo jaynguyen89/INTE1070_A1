@@ -167,19 +167,6 @@ mysqli_close($link);
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
             </form>
-
-<!--                <div class="col-sm-12 text-center">-->
-<!--                    <img src="--><?php //echo $qrCode; ?><!--">-->
-<!--                    <div class="instruction">-->
-<!--                        <h3><i class="far fa-question-circle"></i> How to setup:</h3>-->
-<!--                        <p><i class="fas fa-circle"></i> Install Google Authenticator app on your mobile.</p>-->
-<!--                        <p><i class="fas fa-circle"></i> Launch the app, scan the QR image.</p>-->
-<!--                        <p><i class="fas fa-circle"></i> Remember to tap on `Add Account` button after you have scanned the QR image.</p>-->
-<!--                        <p><i class="fas fa-circle"></i> When you are done, click the `Continue` button.</p>-->
-<!--                    </div>-->
-<!--                    <a href="verify_twofa.php" class="btn btn-primary">Continue</a>-->
-<!--                </div>-->
-<!--            --><?php //} ?>
         </div>
     </div>
 </div>
