@@ -79,8 +79,8 @@ function sendCodeToEmail($code, $email) {
         $mail->SMTPDebug = SMTP::DEBUG_SERVER;
         $mail->Host = 'smtp.google.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'nguyen.le.kim.phuc@gmail.com';
-        $mail->Password = 'Chay571990';
+        $mail->Username = 'sample@gmail.com';
+        $mail->Password = 'password';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port = 465;
 
